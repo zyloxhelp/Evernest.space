@@ -498,7 +498,24 @@
     }
     $$(".flopt").forEach(function (b) { b.addEventListener("click", function () { st.f = +b.dataset.flav; applyVariant(); if (typeof show === "function") show(0); }); });
     $$(".sizeopt").forEach(function (b) { b.addEventListener("click", function () { st.s = +b.dataset.s; applyVariant(); if (typeof show === "function") show(0); }); });
-    if (P.sizes) applyVariant(); else applyPack();
+    /* warm the cache so a flavour or size tap swaps the picture instantly */
+    var warm = {};
+    function pre(src) { if (!src || warm[src]) return; var im = new Image(); im.decoding = "async"; im.src = src; warm[src] = im; }
+    function preloadAll() {
+      if (!P.sizes) return;
+      var cf = P.flavours[st.f].key, cs = P.sizes[st.s].key, list = [];
+      P.sizes.forEach(function (z) { list.push(P.img[cf][z.key].main); });
+      P.flavours.forEach(function (f) { list.push(P.img[f.key][cs].main); });
+      P.flavours.forEach(function (f) { list.push(P.img[f.key].range); });
+      P.flavours.forEach(function (f) { P.sizes.forEach(function (z) { list.push(P.img[f.key][z.key].main); }); });
+      list.forEach(pre);
+    }
+    if (P.sizes) {
+      applyVariant();
+      if (document.readyState === "complete") preloadAll(); else window.addEventListener("load", function () { setTimeout(preloadAll, 50); });
+      $$(".flopt").forEach(function (b) { var f = P.flavours[+b.dataset.flav].key; ["pointerenter", "touchstart", "focus"].forEach(function (ev) { b.addEventListener(ev, function () { pre(P.img[f][P.sizes[st.s].key].main); pre(P.img[f].range); }, { passive: true }); }); });
+      $$(".sizeopt").forEach(function (b) { var z = P.sizes[+b.dataset.s].key; ["pointerenter", "touchstart", "focus"].forEach(function (ev) { b.addEventListener(ev, function () { pre(P.img[P.flavours[st.f].key][z].main); }, { passive: true }); }); });
+    } else applyPack();
     track("ViewContent", { content_name: P.name, content_ids: [P.slug], content_type: "product", value: P.packs[0].price, currency: "INR", contents: [{ id: P.slug, quantity: 1, item_price: P.packs[0].price }] });
 
     /* gallery */
