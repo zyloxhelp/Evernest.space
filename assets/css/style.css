@@ -1230,3 +1230,12 @@ html:not(.js) .stack img{transform:none;opacity:1}
 .n-src li{margin:.25rem 0}
 .n-src a{color:inherit;text-decoration:underline;text-underline-offset:2px;overflow-wrap:anywhere}
 @media(max-width:900px){.ngrid{grid-template-columns:1fr 1fr;gap:.7rem}.ncard{padding:1.1rem .95rem}.nbig{font-size:2rem}.ncard p{font-size:.86rem}}
+
+/* thank you page */
+.ty{padding:3rem 0 4rem;text-align:center}.ty-in{max-width:640px}
+.ty .succ-drg{margin-bottom:.4rem}.ty h1{font-size:clamp(2rem,6vw,3rem);margin:.2rem 0 .4rem}
+.ty-lead{font-size:1.15rem;font-weight:700;margin:0 auto 1.4rem}
+.ty-card{background:#fff;border:1px solid var(--line,#e8e2f5);border-radius:18px;padding:1rem 1.2rem;margin:0 auto 1.4rem;text-align:left}
+.ty-card .drow{gap:1rem}.ty-card .drow b{text-align:right;overflow-wrap:anywhere}
+.ty-steps{text-align:left;max-width:520px;margin:0 auto 1.2rem;padding-left:1.2rem;display:grid;gap:.7rem}
+.ty .dnote{margin:1rem 0 1.4rem}

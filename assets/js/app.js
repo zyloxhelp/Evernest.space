@@ -389,8 +389,12 @@
         track("Lead", { content_name: names, value: total, currency: "INR", num_items: leadItems, content_type: "product", content_ids: leadIds, contents: leadContents },
           { email: payload.email, phone: payload.phone, name: payload.name, pin: payload.pincode });
         $("#ok-name").textContent = payload.name.split(" ")[0]; $("#ok-ref").textContent = ref; $("#ok-items").textContent = names;
+        /* the thank you page reads this (kept in this browser tab only, never put in the URL) */
+        safe(function () { sessionStorage.setItem("evn_thanks", JSON.stringify({ name: payload.name, ref: ref, items: snap, total: total })); });
+        var thanks = co.getAttribute("data-thanks");
         co.classList.add("done"); co.scrollTop = 0; btn.disabled = false; btn.textContent = "Complete checkout";
         cart = []; saveCart(); form.reset();
+        if (thanks) { setTimeout(function () { location.href = thanks; }, 450); return; }
         window.dispatchEvent(new CustomEvent("evn:done"));
         var m = $(".co-done .mascot, .co-done svg"); if (m) { var r = m.getBoundingClientRect(); confetti(r.left + r.width / 2, r.top + 40); }
       }
@@ -399,6 +403,19 @@
       var timer = setTimeout(done, 4000);                     /* never leave a real visitor stuck on the button */
       send(payload, true).then(function () { clearTimeout(timer); done(); }, function () { clearTimeout(timer); done(); });
     });
+  }
+
+  /* ---------- Thank you page ---------- */
+  var ty = $("#ty-h");
+  if (ty) {
+    var T = safe(function () { return JSON.parse(sessionStorage.getItem("evn_thanks") || "null"); });
+    if (T && T.name) {
+      $("#ty-name").textContent = ", " + String(T.name).trim().split(/\s+/)[0];
+      $("#ty-who").textContent = T.name; $("#ty-ref").textContent = T.ref || "";
+      $("#ty-items").textContent = (T.items || []).map(function (i) { return i.name + (i.variant ? " (" + i.variant + ")" : "") + (i.pack ? ", " + i.pack : "") + " x" + i.qty; }).join(" | ");
+      $("#ty-total").textContent = money(T.total || 0);
+      $("#ty-card").hidden = false;
+    }
   }
 
   /* contact form (same pipeline) */
