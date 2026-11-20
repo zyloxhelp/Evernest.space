@@ -1190,3 +1190,43 @@ html:not(.js) .stack img{transform:none;opacity:1}
   .pdp2 .bb>.points{order:5}
   .pdp2 .bb>.meta{order:6}
 }
+
+/* ---- protein: flavour pills and size cards ---- */
+.flavs{display:flex;flex-wrap:wrap;gap:.4rem}
+.flopt{display:inline-flex;align-items:center;gap:.45rem;padding:.6rem .8rem;border-radius:999px;border:1.5px solid var(--line);background:#fff;font:700 .92rem/1 var(--f-d);transition:border-color .2s,background .2s}
+.flopt .sw{width:16px;height:16px;border-radius:50%;background:var(--s);box-shadow:0 0 0 2px #fff,0 0 0 3px rgba(23,19,15,.18)}
+.flopt:hover{border-color:var(--pdeep,var(--ink))}
+.flopt[aria-pressed=true]{background:var(--pdeep,var(--ink));border-color:var(--pdeep,var(--ink));color:#fff}
+.flopt:focus-visible,.sizeopt:focus-visible{outline:3px solid var(--pdeep,var(--ink));outline-offset:2px}
+.sizes{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:.6rem}
+.sizeopt{position:relative;display:flex;flex-direction:column;align-items:center;gap:.12rem;text-align:center;background:#fff;border:1.5px solid var(--line);border-radius:16px;padding:1.25rem .4rem .8rem;transition:border-color .2s,box-shadow .2s}
+.sizeopt b{font:800 1.15rem var(--f-d)}
+.sizeopt span:not(.flag){font-size:.76rem;color:var(--ink2);font-weight:600}
+.sizeopt i{font:800 .9rem var(--f-d);font-style:normal;margin-top:.2rem}
+.sizeopt .flag{position:absolute;top:-9px;left:50%;transform:translateX(-50%);white-space:nowrap;background:var(--yel);font:800 .58rem/1 var(--f-d);letter-spacing:.06em;padding:.3rem .5rem;border-radius:999px}
+.sizeopt:hover{border-color:var(--pdeep,var(--ink))}
+.sizeopt[aria-pressed=true]{border-color:var(--pdeep,var(--ink));box-shadow:0 0 0 1px var(--pdeep,var(--ink));background:var(--pbg2,#FFFCF4)}
+.pdp2 .meta{flex-wrap:wrap}
+.pk-save[hidden]{display:none}
+.pmore{font-size:.74rem;color:var(--ink2);font-weight:600;margin:.1rem 0 .35rem}
+@media(max-width:900px){
+  .flopt{padding:.7rem .9rem;font-size:.9rem}
+  .sizes{gap:.4rem}
+  .sizeopt b{font-size:1rem}
+}
+
+/* ---- why your child needs it ---- */
+.s-need{background:var(--pbg2,#FFF7E0)}
+.s-need .n-intro{max-width:46rem;margin:0 auto 1.8rem;text-align:center;font-size:1.05rem;color:var(--ink2)}
+.ngrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(215px,1fr));gap:1rem}
+.ncard{background:#fff;border-radius:22px;padding:1.4rem 1.25rem 1.2rem;border:1.5px solid rgba(23,19,15,.08)}
+.nbig{display:block;font:800 clamp(2.2rem,5vw,3rem)/1 var(--f-d);color:var(--pdeep,var(--ink));letter-spacing:-.02em;margin-bottom:.55rem}
+.ncard p{margin:0;font-size:.95rem;line-height:1.45}
+.ncard sup a{color:var(--ink2);font-weight:700;text-decoration:none;padding:0 .15rem}
+.n-note{max-width:46rem;margin:1.6rem auto 0;padding:1.1rem 1.25rem;background:#fff;border-radius:18px;border-left:5px solid var(--pdeep,var(--ink));font-size:.97rem;line-height:1.55}
+.n-src{max-width:46rem;margin:1.4rem auto 0;font-size:.82rem;color:var(--ink2)}
+.n-src h4{font:800 .78rem var(--f-d);letter-spacing:.08em;text-transform:uppercase;margin:0 0 .4rem}
+.n-src ol{margin:0 0 .6rem;padding-left:1.2rem}
+.n-src li{margin:.25rem 0}
+.n-src a{color:inherit;text-decoration:underline;text-underline-offset:2px;overflow-wrap:anywhere}
+@media(max-width:900px){.ngrid{grid-template-columns:1fr 1fr;gap:.7rem}.ncard{padding:1.1rem .95rem}.nbig{font-size:2rem}.ncard p{font-size:.86rem}}

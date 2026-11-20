@@ -334,8 +334,8 @@
   renderBadge(); renderDrawer();
 
   function addToCart(item) {
-    var k = [item.product, item.packLabel, item.age].join("|");
-    var hit = cart.filter(function (c) { return [c.product, c.packLabel, c.age].join("|") === k; })[0];
+    var k = [item.product, item.variant, item.packLabel, item.age].join("|");
+    var hit = cart.filter(function (c) { return [c.product, c.variant, c.packLabel, c.age].join("|") === k; })[0];
     if (hit) hit.qty = Math.min(10, hit.qty + item.qty); else cart.push(item);
     saveCart();
     track("AddToCart", { content_name: item.name, content_ids: [item.product], content_type: "product", value: item.price * item.qty, currency: "INR", num_items: item.qty, contents: [{ id: item.product, quantity: item.qty, item_price: item.price }] });
@@ -423,15 +423,17 @@
   /* ---------- Product page ---------- */
   var P = window.EVN_PRODUCT;
   if (P) {
-    var st = { p: 0, qty: 1, age: "" };
+    var st = { p: 0, qty: 1, age: "", f: P.start ? P.start.f : 0, s: P.start ? P.start.s : 0 };
+    function curPacks() { return P.sizes ? P.sizes[st.s].packs : P.packs; }
+    function curMrp() { return P.sizes ? P.sizes[st.s].mrp : P.mrp; }
     var $price = $("#pr-now"), $mrp = $("#pr-mrp"), $off = $("#pr-off"), $per = $("#pr-per");
     function applyPack() {
-      var k = P.packs[st.p];
+      var k = curPacks()[st.p], M = curMrp();
       var each = Math.round(k.price / k.n);
       if ($price) $price.textContent = money(k.price * 1);
-      var sale = k.price < P.mrp * k.n;
-      if ($mrp) { $mrp.textContent = money(P.mrp * k.n); $mrp.hidden = !sale; }
-      if ($off) { $off.textContent = Math.round((1 - k.price / (P.mrp * k.n)) * 100) + "% OFF"; $off.hidden = !sale; }
+      var sale = k.price < M * k.n;
+      if ($mrp) { $mrp.textContent = money(M * k.n); $mrp.hidden = !sale; }
+      if ($off) { $off.textContent = Math.round((1 - k.price / (M * k.n)) * 100) + "% OFF"; $off.hidden = !sale; }
       if ($per) $per.textContent = k.n > 1 ? "That is just " + money(each) + " each" : "";
       $$(".packopt").forEach(function (b) { b.setAttribute("aria-pressed", String(+b.dataset.p === st.p)); });
       var sp = $("#sticky-price"); if (sp) sp.textContent = money(k.price);
@@ -457,13 +459,46 @@
     $("#qty-minus").addEventListener("click", function () { st.qty = Math.max(1, st.qty - 1); qo.textContent = st.qty; });
     $("#qty-plus").addEventListener("click", function () { st.qty = Math.min(10, st.qty + 1); qo.textContent = st.qty; });
     function pdpItem() {
-      var k = P.packs[st.p];
-      return { product: P.slug, name: P.name, variant: P.flavour || "", packLabel: k.label, qty: st.qty, price: k.price, mrp: P.mrp * k.n, age: st.age, thumb: P.thumb, url: P.url };
+      var k = curPacks()[st.p];
+      var v = P.flavours ? P.flavours[st.f].label : (P.flavour || "");
+      return { product: P.slug, name: P.name, variant: v, packLabel: k.label, qty: st.qty, price: k.price, mrp: curMrp() * k.n, age: st.age, thumb: P.thumb, url: P.url };
     }
     $$(".js-pdp-add").forEach(function (b) { b.addEventListener("click", function () { if (needAge()) return; var it = pdpItem(); flyToCart($(".gmain .js-pack"), function () { addToCart(it); openDrawer(); }); }); });
     $$(".js-pdp-buy").forEach(function (b) { b.addEventListener("click", function () { if (needAge()) return; var it = pdpItem(); flyToCart($(".gmain .js-pack"), function () { addToCart(it); goCheckout("buy_now"); }); }); });
     $$(".js-allrev").forEach(function (b) { b.addEventListener("click", function () { $$(".rv-more").forEach(function (r) { r.hidden = false; }); b.parentNode.hidden = true; }); });
-    applyPack();
+    /* protein: flavour and size swap the first two gallery images, the pack tiles and the prices */
+    function setTxt(id, t) { var el = $("#" + id); if (el) el.textContent = t; }
+    function applyVariant() {
+      if (!P.sizes) return;
+      var fl = P.flavours[st.f], z = P.sizes[st.s], im = P.img[fl.key], main = im[z.key].main;
+      var sl = $$(".slide"), th = $$(".gthumb");
+      function swap(i, src, alt) {
+        var a = sl[i] && $("img", sl[i]), b = th[i] && $("img", th[i]);
+        if (a) { a.src = src; a.alt = alt; }
+        if (b) b.src = src;
+      }
+      swap(0, main, "Evernest Kids Protein Powder, " + fl.label + ", " + z.label);
+      swap(1, im.range, "Evernest Kids Protein Powder, " + fl.label + ", all sizes");
+      P.thumb = main;
+      var sb = $(".sb-img"); if (sb) sb.src = main;
+      $$(".packopt").forEach(function (b, i) {
+        var k = z.packs[i], im2 = $("img", b), sv = $(".pk-save", b);
+        if (im2) im2.src = im[z.key].pk[i];
+        var tb = $(".pk-t b", b); if (tb) tb.textContent = z.label;
+        var pp = $(".pp", b); if (pp) pp.textContent = money(k.price);
+        var pr = $(".per", b); if (pr) pr.textContent = k.n > 1 ? money(Math.round(k.price / k.n)) + " each" : "Single pack";
+        if (sv) { var sg = z.mrp * k.n - k.price; sv.textContent = "Save " + money(sg); sv.hidden = sg <= 0; }
+      });
+      $$(".flopt").forEach(function (b) { b.setAttribute("aria-pressed", String(+b.dataset.flav === st.f)); });
+      $$(".sizeopt").forEach(function (b) { b.setAttribute("aria-pressed", String(+b.dataset.s === st.s)); });
+      setTxt("flav-now", fl.label); setTxt("size-now", z.label);
+      setTxt("meta-flav", fl.label); setTxt("meta-unit", z.label + " · " + z.servings + " servings");
+      setTxt("pack-now", z.label);
+      applyPack();
+    }
+    $$(".flopt").forEach(function (b) { b.addEventListener("click", function () { st.f = +b.dataset.flav; applyVariant(); if (typeof show === "function") show(0); }); });
+    $$(".sizeopt").forEach(function (b) { b.addEventListener("click", function () { st.s = +b.dataset.s; applyVariant(); if (typeof show === "function") show(0); }); });
+    if (P.sizes) applyVariant(); else applyPack();
     track("ViewContent", { content_name: P.name, content_ids: [P.slug], content_type: "product", value: P.packs[0].price, currency: "INR", contents: [{ id: P.slug, quantity: 1, item_price: P.packs[0].price }] });
 
     /* gallery */
